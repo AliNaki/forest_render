@@ -1,26 +1,245 @@
-<html>
-<body>
-    <div class="login">
-       <h1>FWI Prediction</h1>
-   
-        <!-- Main Input For Receiving Query to our ML -->
-       <form action="{{ url_for('predict_datapoint')}}" method="post">
-         <input type="text" name="Temperature" placeholder="Temperature" required="required" /><br>
-           <input type="text" name="RH" placeholder="RH" required="required" /><br>
-           <input type="text" name="Ws" placeholder="Ws" required="required" /><br>
-           <input type="text" name="Rain" placeholder="Rain" required="required" /><br>
-           <input type="text" name="FFMC" placeholder="FFMC" required="required" /><br>
-           <input type="text" name="DMC" placeholder="DMC" required="required" /><br>
-           <input type="text" name="ISI" placeholder="ISI" required="required" /><br>
-           <input type="text" name="Classes" placeholder="Classes" required="required" /><br>
-           <input type="text" name="Region" placeholder="Region" required="required" /><br>
-   
-   
-   
-           <button type="submit" class="btn btn-primary btn-block btn-large">Predict</button>
-       </form>
-    <h2>
-       THE FWI prediction is {{result}}
-    </h2>
-   <body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FWI Prediction</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height: 100vh;
+      }
+      .container {
+        max-width: 800px;
+        width: 100%;
+        background: #fff;
+        padding: 2rem;
+        margin: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+      }
+      h1 {
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+      input[type="number"],
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .reset-button {
+        background-color: #6c757d;
+      }
+      .reset-button:hover {
+        background-color: #5a6268;
+      }
+      .details,
+      .dataset-info {
+        margin-top: 1rem;
+        background: #f9f9f9;
+        padding: 1rem;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .details h2,
+      .dataset-info h2 {
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>FWI Prediction</h1>
+      <form action="{{ url_for('predict_datapoint') }}" method="post">
+        <input
+          type="number"
+          step="any"
+          name="Temperature"
+          placeholder="Temperature (°C)"
+          min="-50"
+          max="50"
+          required
+        /><br />
+        <input
+          type="number"
+          step="any"
+          name="RH"
+          placeholder="Relative Humidity (%)"
+          min="0"
+          max="100"
+          required
+        /><br />
+        <input
+          type="number"
+          step="any"
+          name="Ws"
+          placeholder="Wind Speed (km/h)"
+          min="0"
+          max="200"
+          required
+        /><br />
+        <input
+          type="number"
+          step="any"
+          name="Rain"
+          placeholder="Rain (mm)"
+          min="0"
+          max="500"
+          required
+        /><br />
+        <input
+          type="number"
+          step="any"
+          name="FFMC"
+          placeholder="Fine Fuel Moisture Code"
+          min="0"
+          max="101"
+          required
+        /><br />
+        <input
+          type="number"
+          step="any"
+          name="DMC"
+          placeholder="Duff Moisture Code"
+          min="0"
+          max="300"
+          required
+        /><br />
+        <input
+          type="number"
+          step="any"
+          name="ISI"
+          placeholder="Initial Spread Index"
+          min="0"
+          max="100"
+          required
+        /><br />
+        <input
+          type="text"
+          name="Classes"
+          placeholder="Classes"
+          required
+        /><br />
+        <input type="text" name="Region" placeholder="Region" required /><br />
+        <button type="submit">Predict</button>
+        <button type="reset" class="reset-button">Reset</button>
+      </form>
+
+      {% if result is not none %}
+      <h2>THE FWI prediction is {{ result }}</h2>
+      {% endif %}
+
+      <div class="details">
+        <h2>Fire Weather Index (FWI)</h2>
+        <p>
+          The Fire Weather Index (FWI) is a numerical value representing the
+          potential for fire to start and spread under current weather
+          conditions. It combines several factors including temperature,
+          relative humidity, wind speed, and precipitation. This index helps in
+          predicting fire behavior and guiding fire management efforts.
+        </p>
+
+        <h3>Input Features and Ranges:</h3>
+        <ul>
+          <li>
+            <strong>Temperature (°C):</strong> Air temperature. Suggested range:
+            -50 to 50°C. Extreme temperatures can affect vegetation moisture and
+            fire behavior.
+          </li>
+          <li>
+            <strong>Relative Humidity (RH):</strong> Percentage of moisture in
+            the air. Suggested range: 0 to 100%. Low RH increases fire risk by
+            drying fuels, while high RH generally decreases it.
+          </li>
+          <li>
+            <strong>Wind Speed (km/h):</strong> Speed of wind. Suggested range:
+            0 to 200 km/h. High wind speeds can accelerate fire spread.
+          </li>
+          <li>
+            <strong>Rain (mm):</strong> Amount of precipitation. Suggested
+            range: 0 to 500 mm. More rain usually reduces fire risk by
+            increasing moisture in fuels.
+          </li>
+          <li>
+            <strong>Fine Fuel Moisture Code (FFMC):</strong> Moisture content of
+            fine fuels. Suggested range: 0 to 101. Higher values indicate drier
+            conditions, increasing flammability.
+          </li>
+          <li>
+            <strong>Duff Moisture Code (DMC):</strong> Moisture content of duff.
+            Suggested range: 0 to 300. Higher values mean moister duff, reducing
+            fire risk from these materials.
+          </li>
+          <li>
+            <strong>Initial Spread Index (ISI):</strong> Rate of fire spread.
+            Suggested range: 0 to 100. Higher ISI indicates faster fire spread.
+          </li>
+          <li>
+            <strong>Classes:</strong> Categorization of fire risk based on
+            historical data or specific criteria.
+          </li>
+          <li>
+            <strong>Region:</strong> Geographical area where data is collected.
+            Different regions have varying typical values and patterns.
+          </li>
+        </ul>
+      </div>
+
+      <div class="dataset-info">
+        <h2>Algerian Forest Fires Dataset</h2>
+        <p>
+          <strong>Overview:</strong> The dataset contains information about
+          forest fires in two regions of Algeria: Bejaia (northeast) and Sidi
+          Bel-abbes (northwest). It covers the period from June 2012 to
+          September 2012.
+        </p>
+        <ul>
+          <li>
+            <strong>Instances:</strong> 244 total instances (122 for each
+            region).
+          </li>
+          <li>
+            <strong>Attributes:</strong> 11 attributes plus 1 output attribute
+            (class).
+          </li>
+          <li>
+            <strong>Classes:</strong> Instances are classified into two
+            categories: <strong>fire</strong> (138 instances) and
+            <strong>not fire</strong> (106 instances).
+          </li>
+        </ul>
+        <p>
+          This dataset helps in analyzing and predicting forest fire occurrences
+          based on various meteorological and environmental factors.
+        </p>
+      </div>
+    </div>
+  </body>
 </html>
