@@ -1,4 +1,5 @@
 scikit-learn
-Flask==2.0.1
+Flask
+Gunicorn
 
 
